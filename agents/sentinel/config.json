@@ -1,0 +1,27 @@
+{
+  "name": "sentinel",
+  "mode": "paper",
+  "poll_interval_seconds": 30,
+  "watchlist": [
+    {"symbol": "BTC", "asset_type": "crypto"},
+    {"symbol": "GLD", "asset_type": "commodity", "note": "gold"},
+    {"symbol": "SLV", "asset_type": "commodity", "note": "silver"},
+    {"symbol": "HG", "asset_type": "commodity", "note": "copper"}
+  ],
+  "strategy": "breakout",
+  "risk": {
+    "max_position_size_pct": 2.0,
+    "max_positions": 5,
+    "stop_loss_pct": 3.0,
+    "take_profit_pct": 6.0
+  },
+  "breakout": {
+    "lookback_periods": 20,
+    "breakout_threshold_pct": 1.5,
+    "volume_confirmation": true
+  },
+  "hyperliquid": {
+    "api_url": "https://api.hyperliquid.xyz",
+    "testnet": true
+  }
+}
