@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PROMETHEUS — Live Navigator</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Share+Tech+Mono&display=swap');
 
   :root {
-    --core-orange: #ff6b1a;
-    --core-amber: #ffa726;
-    --glow-orange: rgba(255, 107, 26, 0.6);
-    --chat-blue: #00b8ff;
-    --files-amber: #ffb300;
-    --web-cyan: #00e5cc;
-    --trading-green: #00e676;
-    --alert-red: #ff1744;
-    --purple: #a78bfa;
-    --purple-dim: rgba(167,139,250,0.15);
-    --bg-deep: #05080d;
-    --bg-panel: rgba(10, 16, 28, 0.92);
-    --ring-color: rgba(255, 107, 26, 0.10);
-    --ring-bright: rgba(255, 107, 26, 0.25);
-    --text-dim: rgba(255, 167, 38, 0.4);
-    --text-mid: rgba(255, 167, 38, 0.7);
-    --text-bright: #ffd180;
-    --scanline: rgba(255, 107, 26, 0.03);
+    --core-orange: #00ff87;
+    --core-amber: #9affc5;
+    --glow-orange: rgba(0, 255, 135, 0.55);
+    --chat-blue: #00ffa6;
+    --files-amber: #8affd1;
+    --web-cyan: #2bffc3;
+    --trading-green: #00ff87;
+    --alert-red: #ff4d6d;
+    --purple: #59ffa0;
+    --purple-dim: rgba(89,255,160,0.18);
+    --bg-deep: #030607;
+    --bg-panel: rgba(6, 10, 12, 0.92);
+    --ring-color: rgba(0, 255, 135, 0.12);
+    --ring-bright: rgba(0, 255, 135, 0.35);
+    --text-dim: rgba(116, 255, 187, 0.35);
+    --text-mid: rgba(116, 255, 187, 0.7);
+    --text-bright: #caffdf;
+    --scanline: rgba(0, 255, 135, 0.04);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,11 +33,21 @@
   body {
     background: var(--bg-deep);
     color: var(--text-bright);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'VT323', monospace;
     overflow: hidden;
     height: 100vh;
     width: 100vw;
     cursor: crosshair;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,255,135,0.08) 0%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+    z-index: 9998;
+    mix-blend-mode: screen;
   }
 
   body::after {
@@ -58,13 +68,13 @@
     z-index: 100; border-bottom: 1px solid rgba(255,107,26,0.08);
   }
   .top-bar-left { display: flex; align-items: center; gap: 12px; }
-  .top-bar-title { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 14px; letter-spacing: 6px; color: var(--core-orange); text-shadow: 0 0 20px var(--glow-orange); }
+  .top-bar-title { font-family: 'Press Start 2P', sans-serif; font-weight: 900; font-size: 14px; letter-spacing: 6px; color: var(--core-orange); text-shadow: 0 0 20px var(--glow-orange); }
   .top-bar-version { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; padding: 2px 6px; border: 1px solid rgba(255,107,26,0.15); border-radius: 2px; }
   .top-bar-right { display: flex; align-items: center; gap: 20px; font-size: 11px; }
   .status-indicator { display: flex; align-items: center; gap: 6px; letter-spacing: 1px; }
   .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--trading-green); box-shadow: 0 0 8px var(--trading-green); animation: pulse-dot 2s ease-in-out infinite; }
   .status-dot.warning { background: var(--core-amber); box-shadow: 0 0 8px var(--core-amber); }
-  .clock { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--text-mid); letter-spacing: 2px; }
+  .clock { font-family: 'Press Start 2P', sans-serif; font-size: 11px; color: var(--text-mid); letter-spacing: 2px; }
 
   .corner-deco { position: fixed; width: 60px; height: 60px; z-index: 50; opacity: 0.3; }
   .corner-deco.tl { top: 56px; left: 8px; border-top: 1px solid var(--core-orange); border-left: 1px solid var(--core-orange); }
@@ -93,7 +103,7 @@
   .core-orb-inner { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, var(--core-orange) 0%, rgba(255,107,26,0.3) 60%, transparent 80%); box-shadow: 0 0 40px rgba(255,107,26,0.4), 0 0 80px rgba(255,107,26,0.15); animation: core-breathe 3s ease-in-out infinite; transition: background 0.8s, box-shadow 0.8s; }
   .core-orbit-ring { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 1px solid rgba(255,107,26,0.3); animation: orbit-spin 4s linear infinite; transition: border-color 0.8s; }
   .core-orbit-ring::before { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--core-orange); box-shadow: 0 0 8px var(--core-orange); transform: translateX(-50%); }
-  .core-label { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 4px; color: var(--core-orange); text-shadow: 0 0 10px var(--glow-orange); white-space: nowrap; transition: color 0.8s; }
+  .core-label { font-family: 'Press Start 2P', sans-serif; font-size: 8px; letter-spacing: 4px; color: var(--core-orange); text-shadow: 0 0 10px var(--glow-orange); white-space: nowrap; transition: color 0.8s; }
   .core-activity { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); white-space: nowrap; transition: color 0.5s; animation: activity-blink 1.5s ease-in-out infinite; }
 
   /* Connection beam */
@@ -113,11 +123,11 @@
   .module-node.targeted .module-icon::after { opacity: 1; }
   .module-node.targeted .module-icon { border-color: var(--module-color); box-shadow: 0 0 40px var(--module-glow), 0 0 80px var(--module-glow); }
   .module-icon svg { width: 28px; height: 28px; opacity: 0.9; }
-  .module-label { font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 4px; color: var(--text-dim); transition: color 0.3s; text-transform: uppercase; }
+  .module-label { font-family: 'Press Start 2P', sans-serif; font-size: 9px; letter-spacing: 4px; color: var(--text-dim); transition: color 0.3s; text-transform: uppercase; }
   .module-node.targeted .module-label { color: var(--module-color); }
 
   /* Subagent count badge on module icon */
-  .sa-count-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--purple); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 0 8px var(--purple-dim); border: 1px solid rgba(167,139,250,0.3); }
+  .sa-count-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--purple); color: #fff; font-family: 'Press Start 2P', sans-serif; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 0 8px var(--purple-dim); border: 1px solid rgba(167,139,250,0.3); }
 
   .module-chat { --module-color: var(--chat-blue); --module-glow: rgba(0,184,255,0.15); top: 8%; left: 18%; }
   .module-files { --module-color: var(--files-amber); --module-glow: rgba(255,179,0,0.15); top: 8%; right: 18%; }
@@ -125,7 +135,7 @@
   .module-trading { --module-color: var(--trading-green); --module-glow: rgba(0,230,118,0.15); bottom: 8%; right: 18%; }
 
   .module-tooltip { position: absolute; top: 80px; background: var(--bg-panel); border: 1px solid var(--module-color); border-radius: 4px; padding: 12px 16px; min-width: 180px; opacity: 0; transform: translateY(-8px); transition: all 0.3s ease; pointer-events: none; backdrop-filter: blur(12px); box-shadow: 0 0 20px var(--module-glow); z-index: 50; }
-  .tooltip-header { font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--module-color); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .tooltip-header { font-family: 'Press Start 2P', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--module-color); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .tooltip-row { display: flex; justify-content: space-between; font-size: 11px; margin: 4px 0; }
   .tooltip-key { color: var(--text-dim); }
   .tooltip-val { color: var(--text-bright); }
@@ -134,12 +144,12 @@
 
   /* Activity log (left) */
   .activity-log { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); width: 260px; z-index: 80; display: flex; flex-direction: column; gap: 2px; }
-  .activity-log-title { font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .activity-log-title { font-family: 'Press Start 2P', sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   .activity-log-title::before { content: ''; width: 6px; height: 6px; background: var(--core-orange); border-radius: 50%; animation: pulse-dot 1.5s ease-in-out infinite; }
   .log-entry { font-size: 10px; padding: 4px 8px; border-left: 2px solid var(--text-dim); color: var(--text-dim); opacity: 0; transform: translateX(-10px); animation: log-slide-in 0.3s ease forwards; line-height: 1.4; }
   .log-entry.current { border-left-color: var(--core-orange); color: var(--text-bright); }
   .log-entry .log-time { color: var(--text-dim); font-size: 8px; margin-right: 6px; }
-  .log-entry .log-module { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 1px; padding: 1px 4px; border-radius: 2px; margin-right: 4px; }
+  .log-entry .log-module { font-family: 'Press Start 2P', sans-serif; font-size: 8px; letter-spacing: 1px; padding: 1px 4px; border-radius: 2px; margin-right: 4px; }
   .log-module.chat { background: rgba(0,184,255,0.15); color: var(--chat-blue); }
   .log-module.trading { background: rgba(0,230,118,0.15); color: var(--trading-green); }
   .log-module.web { background: rgba(0,229,204,0.15); color: var(--web-cyan); }
@@ -150,8 +160,8 @@
   /* Task panel (right) */
   .task-panel { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); width: 280px; z-index: 80; background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 16px; backdrop-filter: blur(10px); opacity: 0; transition: opacity 0.5s, border-color 0.5s; }
   .task-panel.active { opacity: 1; }
-  .task-panel-header { font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-  .task-panel-module { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+  .task-panel-header { font-family: 'Press Start 2P', sans-serif; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+  .task-panel-module { font-family: 'Press Start 2P', sans-serif; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
   .task-panel-desc { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 12px; }
   .task-progress { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
   .task-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, background 0.5s; }
@@ -192,8 +202,8 @@
     backdrop-filter: blur(10px);
   }
   .sa-panel-tab:hover { border-color: var(--purple); }
-  .sa-panel-tab-label { font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--purple); }
-  .sa-panel-tab-count { background: var(--purple); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+  .sa-panel-tab-label { font-family: 'Press Start 2P', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--purple); }
+  .sa-panel-tab-count { background: var(--purple); color: #fff; font-family: 'Press Start 2P', sans-serif; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
   .sa-panel-tab-arrow { color: var(--purple); font-size: 12px; transition: transform 0.3s; }
   .sa-panel.open .sa-panel-tab-arrow { transform: rotate(180deg); }
   .sa-panel.open .sa-panel-tab { border-color: var(--purple); background: rgba(167,139,250,0.08); }
@@ -229,7 +239,7 @@
   .sa-table th { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-align: left; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase; }
   .sa-table td { font-size: 11px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-bright); vertical-align: middle; }
 
-  .sa-table-name { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+  .sa-table-name { font-family: 'Press Start 2P', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
   .sa-table-task { color: var(--text-dim); font-size: 11px; }
   .sa-table-module { font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 2px; letter-spacing: 1px; }
   .sa-table-module.chat { background: rgba(0,184,255,0.12); color: var(--chat-blue); }
@@ -261,19 +271,19 @@
   .detail-panel { background: var(--bg-panel); border: 1px solid var(--panel-color, var(--core-orange)); border-radius: 8px; width: 90%; max-width: 900px; max-height: 80vh; overflow-y: auto; padding: 32px; transform: scale(0.9); transition: transform 0.4s ease; box-shadow: 0 0 60px var(--panel-glow, rgba(255,107,26,0.15)); }
   .detail-overlay.active .detail-panel { transform: scale(1); }
   .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .detail-title { font-family: 'Orbitron', sans-serif; font-size: 18px; letter-spacing: 4px; color: var(--panel-color, var(--core-orange)); display: flex; align-items: center; gap: 12px; }
+  .detail-title { font-family: 'Press Start 2P', sans-serif; font-size: 18px; letter-spacing: 4px; color: var(--panel-color, var(--core-orange)); display: flex; align-items: center; gap: 12px; }
   .detail-close { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background: transparent; color: var(--text-mid); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .detail-close:hover { border-color: var(--alert-red); color: var(--alert-red); }
   .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .stat-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 16px; text-align: center; }
-  .stat-value { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .stat-value { font-family: 'Press Start 2P', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .stat-value.green { color: var(--trading-green); }
   .stat-value.orange { color: var(--core-amber); }
   .stat-label { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
-  .section-title { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--text-mid); margin: 24px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .section-title { font-family: 'Press Start 2P', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--text-mid); margin: 24px 0 8px; display: flex; align-items: center; gap: 8px; }
   .section-title::before { content: ''; width: 8px; height: 8px; background: var(--panel-color, var(--core-orange)); border-radius: 2px; opacity: 0.7; }
   .data-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  .data-table th { font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase; }
+  .data-table th { font-family: 'Press Start 2P', sans-serif; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase; }
   .data-table td { font-size: 12px; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-bright); }
   .badge { padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; letter-spacing: 1px; }
   .badge.long { background: rgba(0,230,118,0.15); color: var(--trading-green); }
@@ -295,7 +305,7 @@
   .bot-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--trading-green); opacity: 0; transition: opacity 0.25s; }
   .bot-card:hover { background: rgba(0,230,118,0.03); border-color: var(--trading-green); box-shadow: 0 0 20px rgba(0,230,118,0.08); }
   .bot-card:hover::before { opacity: 1; }
-  .bot-name { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-bright); }
+  .bot-name { font-family: 'Press Start 2P', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-bright); }
   .bot-strategy { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
   .bot-status { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 1px; }
   .bot-status.running { color: var(--trading-green); }
@@ -311,7 +321,7 @@
   .detail-back-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-mid); cursor: pointer; margin-bottom: 16px; padding: 5px 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; background: transparent; transition: all 0.2s; }
   .detail-back-btn:hover { border-color: var(--trading-green); color: var(--trading-green); }
   .bot-detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
-  .bot-detail-header h3 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; color: var(--trading-green); }
+  .bot-detail-header h3 { font-family: 'Press Start 2P', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; color: var(--trading-green); }
   .tag-running { font-family:'Share Tech Mono',monospace; font-size:10px; padding:3px 10px; border-radius:3px; letter-spacing:1px; background:rgba(0,230,118,0.12); color:var(--trading-green); border:1px solid var(--trading-green); }
   .tag-paused { font-family:'Share Tech Mono',monospace; font-size:10px; padding:3px 10px; border-radius:3px; letter-spacing:1px; background:rgba(255,196,0,0.12); color:var(--core-amber); border:1px solid var(--core-amber); }
   .strategy-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid var(--chat-blue); border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; }
@@ -322,7 +332,7 @@
   .hud-stats { position: fixed; bottom: 52px; left: 50%; transform: translateX(-50%); display: flex; gap: 32px; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); z-index: 50; background: rgba(10,16,28,0.7); padding: 8px 24px; border-radius: 4px; border: 1px solid rgba(255,107,26,0.08); backdrop-filter: blur(8px); }
   .hud-item { display: flex; align-items: center; gap: 8px; }
   .hud-label { color: var(--text-dim); }
-  .hud-value { color: var(--text-mid); font-family: 'Orbitron', sans-serif; font-size: 10px; }
+  .hud-value { color: var(--text-mid); font-family: 'Press Start 2P', sans-serif; font-size: 10px; }
   .hud-value.live { color: var(--trading-green); }
 
   /* Sim controls */
