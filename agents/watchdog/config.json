@@ -1,0 +1,13 @@
+{
+  "name": "watchdog",
+  "check_interval_seconds": 60,
+  "thresholds": {
+    "cpu_percent": {"warning": 80, "critical": 95},
+    "ram_percent": {"warning": 80, "critical": 90},
+    "disk_percent": {"warning": 80, "critical": 95}
+  },
+  "monitored_processes": ["openclaw", "redis-server"],
+  "log_max_size_mb": 100,
+  "log_paths": ["~/gateway.log"],
+  "auto_remediate": true
+}
