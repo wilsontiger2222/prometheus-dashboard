@@ -1,0 +1,13 @@
+{
+  "name": "prometheus",
+  "response_timeout_seconds": 30,
+  "keyword_shortcuts": {
+    "/trade": "sentinel",
+    "/status": "watchdog",
+    "/research": "scout",
+    "/deploy": "forge",
+    "/post": "herald"
+  },
+  "agents": ["sentinel", "watchdog", "scout", "forge", "herald"],
+  "heartbeat_stale_seconds": 90
+}
