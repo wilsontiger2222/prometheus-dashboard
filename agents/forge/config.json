@@ -1,0 +1,10 @@
+{
+  "name": "forge",
+  "workspace": "agents/forge/workspace",
+  "github_user": "wilsontiger2222",
+  "default_branch": "main",
+  "auto_test": true,
+  "deploy_on_push": false,
+  "test_command": "python -m pytest",
+  "test_timeout_seconds": 120
+}
