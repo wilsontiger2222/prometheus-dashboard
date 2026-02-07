@@ -773,9 +773,9 @@
       <span class="module-label">Chat</span>
       <div class="module-tooltip">
         <div class="tooltip-header">CHAT SESSIONS</div>
-        <div class="tooltip-row"><span class="tooltip-key">Active</span><span class="tooltip-val active">2 sessions</span></div>
-        <div class="tooltip-row"><span class="tooltip-key">Model</span><span class="tooltip-val">gpt-5.2-codex</span></div>
-        <div class="tooltip-row"><span class="tooltip-key">Tokens</span><span class="tooltip-val warning">145k / 400k</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">Active</span><span class="tooltip-val active" id="tt-chat-active">2 sessions</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">Model</span><span class="tooltip-val" id="tt-chat-model">gpt-5.2-codex</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">Tokens</span><span class="tooltip-val warning" id="tt-chat-tokens">145k / 400k</span></div>
       </div>
     </div>
 
@@ -810,9 +810,9 @@
       <span class="module-label">Trading</span>
       <div class="module-tooltip">
         <div class="tooltip-header">TRADING BOT</div>
-        <div class="tooltip-row"><span class="tooltip-key">Balance</span><span class="tooltip-val">$351.10</span></div>
-        <div class="tooltip-row"><span class="tooltip-key">P&L</span><span class="tooltip-val active">+$3.60</span></div>
-        <div class="tooltip-row"><span class="tooltip-key">Mode</span><span class="tooltip-val warning">Paper</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">Balance</span><span class="tooltip-val" id="tt-trading-balance">$351.10</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">P&L</span><span class="tooltip-val active" id="tt-trading-pnl">+$3.60</span></div>
+        <div class="tooltip-row"><span class="tooltip-key">Mode</span><span class="tooltip-val warning" id="tt-trading-mode">Paper</span></div>
       </div>
     </div>
 
@@ -863,6 +863,28 @@
     web:     { main: '#00e5cc', glow: 'rgba(0,229,204,0.4)', beam: '#00e5cc' },
     trading: { main: '#00e676', glow: 'rgba(0,230,118,0.4)', beam: '#00e676' },
   };
+
+  const API_BASE = new URLSearchParams(window.location.search).get('api') || 'http://localhost:8080';
+  const TOKEN = new URLSearchParams(window.location.search).get('token') || '';
+
+  async function fetchJSON(url, opts = {}) {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function invokeTool(tool, args = {}) {
+    const res = await fetch(`${API_BASE}/api/tools/invoke`, {
+      method: 'POST',
+      headers: {
+        'Authorization': TOKEN ? `Bearer ${TOKEN}` : '',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tool, args })
+    });
+    const data = await res.json();
+    return data.ok ? data.result.details : null;
+  }
 
   let currentTarget = 'idle';
   let taskStartTime = null;
@@ -1256,7 +1278,40 @@
     }
   };
 
-  function openPanel(type) {
+  function renderTradingPanel(data) {
+    if (!data) return '<div class="detail-header"><div class="detail-title">TRADING BOT</div></div><div>Unable to load trading data.</div>';
+    const totalPnl = Number(data.totalPnl || 0);
+    const pnlClass = totalPnl >= 0 ? 'green' : 'orange';
+    const pnlSign = totalPnl >= 0 ? '+' : '';
+    const openRows = (data.openTrades || []).map(t => `
+      <tr><td>${t.coin}</td><td><span class="badge ${t.side}">${t.side}</span></td><td>$${t.entry.toFixed(2)}</td><td>$${t.stopLoss.toFixed(2)}</td><td>$${t.takeProfit.toFixed(2)}</td></tr>
+    `).join('') || '<tr><td colspan="5">No open positions</td></tr>';
+    const closedRows = (data.closedTrades || []).slice().reverse().map(t => `
+      <tr><td>${t.coin}</td><td><span class="badge ${t.side}">${t.side}</span></td><td>${(t.pnl>=0?'+':'')}$${(t.pnl||0).toFixed(2)}</td><td><span class="badge take-profit">${(t.type||'closed').replace('_',' ')}</span></td></tr>
+    `).join('') || '<tr><td colspan="4">No closed trades</td></tr>';
+
+    return `
+      <div class="detail-header"><div class="detail-title"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--trading-green)" stroke-width="1.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>TRADING BOT</div><button class="detail-close" onclick="closePanel()">×</button></div>
+      <div class="stats-row"><div class="stat-card"><div class="stat-value green">$${(data.balance||0).toFixed(2)}</div><div class="stat-label">PAPER BALANCE</div></div><div class="stat-card"><div class="stat-value ${pnlClass}">${pnlSign}$${totalPnl.toFixed(2)}</div><div class="stat-label">TOTAL P&L</div></div><div class="stat-card"><div class="stat-value green">${data.winRate||0}%</div><div class="stat-label">WIN RATE</div></div><div class="stat-card"><div class="stat-value orange">${data.totalTrades||0}</div><div class="stat-label">CLOSED TRADES</div></div></div>
+      <div class="section-title">OPEN POSITIONS</div>
+      <table class="data-table"><tr><th>Asset</th><th>Side</th><th>Entry</th><th>SL</th><th>TP</th></tr>${openRows}</table>
+      <div class="section-title">TRADE HISTORY</div>
+      <table class="data-table"><tr><th>Asset</th><th>Side</th><th>P&L</th><th>Result</th></tr>${closedRows}</table>
+    `;
+  }
+
+  function renderChatPanel(data) {
+    if (!data || !data.sessions) return '<div class="detail-header"><div class="detail-title">CHAT SESSIONS</div></div><div>Unable to load session data.</div>';
+    const cards = data.sessions.map(s => {
+      const pct = Math.round((s.totalTokens / s.contextTokens) * 100);
+      return `
+        <div class="session-card"><div><div class="session-name" style="color:var(--chat-blue)">${s.displayName || 'Session'}</div><div class="session-meta"><span>${s.model}</span><span>${s.channel||'direct'}</span></div></div><div style="display:flex;align-items:center;gap:12px;"><span class="badge active">ACTIVE</span><div><div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">${(s.totalTokens/1000).toFixed(1)}k / ${(s.contextTokens/1000).toFixed(0)}k (${pct}%)</div><div class="token-bar"><div class="token-bar-fill" style="width:${pct}%;background:var(--chat-blue);"></div></div></div></div></div>
+      `;
+    }).join('');
+    return `<div class="detail-header"><div class="detail-title"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--chat-blue)" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>CHAT SESSIONS</div><button class="detail-close" onclick="closePanel()">×</button></div>${cards}`;
+  }
+
+  async function openPanel(type) {
     const overlay = document.getElementById('detail-overlay');
     const panel = document.getElementById('detail-panel');
     const content = panelContent[type];
@@ -1264,6 +1319,22 @@
     panel.style.setProperty('--panel-glow', content.glow);
     panel.innerHTML = content.html;
     overlay.classList.add('active');
+
+    if (type === 'trading') {
+      panel.innerHTML = '<div class="detail-header"><div class="detail-title">TRADING BOT</div></div><div>Loading...</div>';
+      try {
+        const data = await fetchJSON(`${API_BASE}/trading`);
+        panel.innerHTML = renderTradingPanel(data);
+      } catch {}
+    }
+
+    if (type === 'chat') {
+      panel.innerHTML = '<div class="detail-header"><div class="detail-title">CHAT SESSIONS</div></div><div>Loading...</div>';
+      try {
+        const data = await invokeTool('sessions_list', { limit: 5 });
+        panel.innerHTML = renderChatPanel(data);
+      } catch {}
+    }
   }
 
   function closePanel(e) {
@@ -1271,11 +1342,37 @@
     document.getElementById('detail-overlay').classList.remove('active');
   }
 
+  async function refreshTooltips() {
+    try {
+      const h = await fetchJSON(`${API_BASE}/health`);
+      if (h && h.tradingBot) {
+        const dot = document.getElementById('trading-dot');
+        dot.classList.toggle('warning', h.tradingBot !== 'running');
+      }
+      const t = await fetchJSON(`${API_BASE}/trading`);
+      if (t) {
+        document.getElementById('tt-trading-balance').textContent = `$${(t.balance||0).toFixed(2)}`;
+        const pnl = Number(t.totalPnl||0);
+        document.getElementById('tt-trading-pnl').textContent = `${pnl>=0?'+':''}$${pnl.toFixed(2)}`;
+        document.getElementById('tt-trading-mode').textContent = (t.config?.mode || 'paper').toUpperCase();
+      }
+      const s = await invokeTool('sessions_list', { limit: 5 });
+      if (s && s.sessions && s.sessions[0]) {
+        document.getElementById('tt-chat-active').textContent = `${s.sessions.length} sessions`;
+        document.getElementById('tt-chat-model').textContent = s.sessions[0].model || 'unknown';
+        const pct = Math.round((s.sessions[0].totalTokens / s.sessions[0].contextTokens) * 100);
+        document.getElementById('tt-chat-tokens').textContent = `${(s.sessions[0].totalTokens/1000).toFixed(1)}k / ${(s.sessions[0].contextTokens/1000).toFixed(0)}k (${pct}%)`;
+      }
+    } catch {}
+  }
+
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
   // Initialize with idle + show task panel
   document.getElementById('task-panel').classList.add('active');
   addLogs(activityScenarios.idle.logs);
+  refreshTooltips();
+  setInterval(refreshTooltips, 8000);
 </script>
 </body>
 </html>
