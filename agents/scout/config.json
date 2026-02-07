@@ -1,0 +1,8 @@
+{
+  "name": "scout",
+  "cache_dir": "agents/scout/cache",
+  "default_cache_ttl_hours": 24,
+  "max_sources": 5,
+  "scraper_timeout_seconds": 15,
+  "max_summary_length": 500
+}
