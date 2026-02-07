@@ -7,6 +7,7 @@ from pathlib import Path
 
 from agents.shared.config import load_agent_config
 from agents.shared.logger import get_agent_logger
+from agents.shared.telegram_bridge import TelegramBridge
 from agents.prometheus.agent import PrometheusAgent
 from agents.sentinel.agent import SentinelAgent
 from agents.watchdog.agent import WatchdogAgent
@@ -67,6 +68,17 @@ class Hivemind:
             task = asyncio.create_task(agent.start())
             self._tasks.append(task)
         logger.info("All agents launched")
+
+        prometheus = self.get_agent("prometheus")
+        if prometheus and self._hive_config.get("telegram_bridge_enabled", False):
+            self._bridge = TelegramBridge(
+                prometheus_agent=prometheus,
+                gateway_url=self._hive_config.get("gateway_url", "ws://127.0.0.1:18789"),
+                gateway_token=self._hive_config.get("gateway_token", ""),
+            )
+            self._tasks.append(asyncio.create_task(self._bridge.start()))
+            logger.info("Telegram bridge launched")
+
         await self._shutdown_event.wait()
         await self.stop()
 

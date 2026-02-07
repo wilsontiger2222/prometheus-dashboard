@@ -71,3 +71,23 @@ class TestHivemind:
         await hive.start()
         for agent in hive._agents:
             agent.stop.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_hivemind_starts_bridge(self, mock_configs):
+        with patch("agents.hivemind.load_agent_config") as hive_cfg:
+            hive_cfg.return_value = {
+                "telegram_bridge_enabled": True,
+                "gateway_url": "ws://localhost:18789",
+            }
+            hive = Hivemind(config_path="dummy.json")
+            for agent in hive._agents:
+                agent.start = AsyncMock(side_effect=asyncio.CancelledError)
+                agent.stop = AsyncMock()
+            with patch("agents.hivemind.TelegramBridge") as MockBridge:
+                mock_bridge = AsyncMock()
+                MockBridge.return_value = mock_bridge
+                mock_bridge.start = AsyncMock(side_effect=asyncio.CancelledError)
+                mock_bridge.stop = AsyncMock()
+                hive._shutdown_event.set()
+                await hive.start()
+                MockBridge.assert_called_once()
