@@ -1,0 +1,9 @@
+{
+  "name": "herald",
+  "platforms": ["twitter"],
+  "require_approval": true,
+  "scheduled_posts_per_day": 3,
+  "content_templates_dir": "agents/herald/templates",
+  "drafts_dir": "agents/herald/drafts",
+  "schedule_interval_seconds": 3600
+}
